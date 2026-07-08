@@ -27,10 +27,9 @@ def dashboard():
 def profile():
     session['profile'] = {
         'name': request.form.get('name'),
-        'about': request.form.get('about'),
-        'photo': 'default.jpg' # Logic for file upload needed
+        'about': request.form.get('about')
     }
-    return redirect('/')
+    return redirect('/dashboard')
 
 @app.route('/chat', methods=['POST'])
 def chat():

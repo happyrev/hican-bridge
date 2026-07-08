@@ -48,11 +48,19 @@
         }
         function sendMessage() {
             const input = document.getElementById('chat-input');
-            fetch('/chat', { method: 'POST', body: new URLSearchParams({message: input.value}) })
-                .then(r => r.text())
-                .then(text => {
-                    document.getElementById('chat-box').innerHTML += `<p><b>AI:</b> ${text}</p>`;
-                });
+            const message = input.value;
+            if(!message) return;
+            document.getElementById('chat-box').innerHTML += `<p><b>You:</b> ${message}</p>`;
+            fetch('/chat', { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: new URLSearchParams({message: message}) 
+            })
+            .then(r => r.text())
+            .then(text => {
+                document.getElementById('chat-box').innerHTML += `<p><b>AI:</b> ${text}</p>`;
+                input.value = '';
+            });
         }
     </script>
 </body>
