@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <h1 class="text-3xl font-bold mb-6">Admin Dashboard</h1>
+    
+    <div class="bg-white p-6 rounded shadow mb-6">
+        <h2 class="text-xl font-semibold mb-4">Students</h2>
+        <table class="w-full text-left">
+            <thead><tr><th>Name</th><th>Age</th><th>Sex</th></tr></thead>
+            <tbody>
+                {% for student in students %}
+                <tr><td>{{ student.name }}</td><td>{{ student.age }}</td><td>{{ student.sex }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="bg-white p-6 rounded shadow">
+        <h2 class="text-xl font-semibold mb-4">Reports</h2>
+        <table class="w-full text-left">
+            <thead><tr><th>Hours</th><th>Confidence</th><th>Summary</th></tr></thead>
+            <tbody>
+                {% for report in reports %}
+                <tr><td>{{ report.hours }}</td><td>{{ report.confidence }}</td><td>{{ report.summary }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
