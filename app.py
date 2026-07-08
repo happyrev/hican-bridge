@@ -17,9 +17,25 @@ def home():
         return redirect('/dashboard')
     return render_template('index.html')
 
+import random
+import datetime
+
+# Mock function for daily quote
+def get_daily_quote():
+    quotes = [
+        "Believe you can and you're halfway there.",
+        "The only way to do great work is to love what you do.",
+        "Your potential is endless.",
+        "Embrace vulnerability as your greatest strength.",
+        "Leadership is about service to others."
+    ]
+    # Simple deterministic choice based on day of year
+    return quotes[datetime.datetime.now().timetuple().tm_yday % len(quotes)]
+
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html', profile=session.get('profile'), daily_plan=daily_plan)
+    quote = get_daily_quote()
+    return render_template('dashboard.html', profile=session.get('profile'), daily_plan=daily_plan, quote=quote)
 
 @app.route('/check-in', methods=['POST'])
 def check_in():
@@ -34,6 +50,14 @@ def check_in():
     )
     score = int(response.choices[0].message.content.split()[0])
     return jsonify({'score': score})
+
+@app.route('/submit-report', methods=['POST'])
+def submit_report():
+    report = request.form.get('report')
+    # Save to file or database
+    with open('weekly_reports.txt', 'a') as f:
+        f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d')} | {report}\n")
+    return redirect('/dashboard')
 
 if __name__ == '__main__':
     app.run(debug=False, port=5000)
