@@ -5,45 +5,36 @@
     <title>Hican Bridge Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); min-height: 100vh; }
-        .card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        body { background: #0f172a; color: white; min-height: 100vh; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body class="p-6">
-    <div class="card p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
-        <h1 class="text-3xl font-bold mb-4">Welcome, {{ profile.name }}!</h1>
-        <p class="mb-6">About you: {{ profile.about }}</p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Reading Section -->
-            <div class="p-4 bg-indigo-100 rounded">
-                <h2 class="font-bold mb-2">Reading Plan</h2>
-                <a href="/static/daring_greatly.pdf" target="_blank" class="text-blue-600 underline">Open Daring Greatly PDF</a>
+    <div class="max-w-md mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-center">Dashboard</h1>
+        
+        <div class="glass p-6 rounded-3xl mb-6">
+            <h2 class="text-xl font-bold mb-4">Today's Mission</h2>
+            {% for day, info in daily_plan.items() %}
+            <div class="mb-4 p-4 bg-white/10 rounded-xl">
+                <p class="font-bold">Day {{ day }}: Pages {{ info.pages }}</p>
+                <input id="ans-{{ day }}" class="w-full p-2 mt-2 text-black rounded" placeholder="Answer: {{ info.question }}">
+                <button onclick="submitQuiz('{{ day }}')" class="mt-2 w-full bg-green-500 py-1 rounded font-bold">Check In</button>
             </div>
-
-            <!-- Chat Section -->
-            <div class="p-4 bg-purple-100 rounded">
-                <h2 class="font-bold mb-2">AI Mentor</h2>
-                <div id="chat-box" class="h-32 border bg-white mb-2 overflow-y-scroll p-2 text-sm"></div>
-                <input id="chat-input" class="w-full p-1 border mb-1" placeholder="Ask AI...">
-                <button onclick="sendMessage()" class="bg-purple-500 text-white w-full rounded">Send</button>
-            </div>
+            {% endfor %}
         </div>
     </div>
 
     <script>
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            fetch('/chat', { 
+        function submitQuiz(day) {
+            const answer = document.getElementById('ans-'+day).value;
+            fetch('/check-in', { 
                 method: 'POST', 
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: new URLSearchParams({message: input.value}) 
+                body: new URLSearchParams({day: day, answer: answer}) 
             })
-            .then(r => r.text())
-            .then(text => {
-                document.getElementById('chat-box').innerHTML += `<p><b>AI:</b> ${text}</p>`;
-                input.value = '';
-            });
+            .then(r => r.json())
+            .then(data => alert('Your score for today: ' + data.score + '%'));
         }
     </script>
 </body>
