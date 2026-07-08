@@ -17,6 +17,12 @@ def home():
         return render_template('dashboard.html', profile=session['profile'])
     return render_template('index.html')
 
+@app.route('/dashboard')
+def dashboard():
+    if 'profile' in session:
+        return render_template('dashboard.html', profile=session['profile'])
+    return redirect('/')
+
 @app.route('/profile', methods=['POST'])
 def profile():
     session['profile'] = {
