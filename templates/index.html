@@ -19,17 +19,18 @@
     <div id="profile" class="page bg-white p-6 rounded-xl shadow-lg max-w-md mx-auto">
         <h2 class="text-xl font-bold mb-4">Your Profile</h2>
         <form action="/profile" method="POST" enctype="multipart/form-data">
-            <input type="text" name="name" placeholder="Name" class="w-full p-2 border mb-2">
-            <input type="file" name="photo" class="mb-2">
-            <button type="submit" class="bg-blue-500 text-white p-2 w-full rounded">Save</button>
+            <input type="text" name="name" placeholder="Name" class="w-full p-2 border mb-2 rounded" required>
+            <textarea name="about" placeholder="About yourself" class="w-full p-2 border mb-2 rounded" required></textarea>
+            <input type="file" name="photo" class="mb-4">
+            <button type="submit" class="bg-blue-500 text-white p-2 w-full rounded hover:bg-blue-600 transition">Save Profile</button>
         </form>
     </div>
 
     <div id="reading" class="page hidden bg-white p-6 rounded-xl shadow-lg max-w-md mx-auto">
         <h2 class="text-xl font-bold mb-4">Daring Greatly Reading</h2>
         <div class="grid grid-cols-2 gap-4">
-            <a href="/static/daring_greatly.pdf#page=1" class="p-4 bg-indigo-100 rounded">Week 1: Chapters 1-2</a>
-            <a href="/static/daring_greatly.pdf#page=10" class="p-4 bg-indigo-100 rounded">Week 2: Chapters 3-4</a>
+            <a href="/static/daring_greatly.pdf#page=1" class="p-4 bg-indigo-100 rounded text-center hover:bg-indigo-200 transition font-bold">Week 1</a>
+            <a href="/static/daring_greatly.pdf#page=20" class="p-4 bg-indigo-100 rounded text-center hover:bg-indigo-200 transition font-bold">Week 2</a>
         </div>
     </div>
 
