@@ -11,6 +11,12 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 with open('daily_plan.json', 'r') as f:
     daily_plan = json.load(f)
 
+@app.route('/')
+def home():
+    if 'profile' in session:
+        return redirect('/dashboard')
+    return render_template('index.html')
+
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html', profile=session.get('profile'), daily_plan=daily_plan)
