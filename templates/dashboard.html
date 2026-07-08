@@ -14,6 +14,13 @@
         <h1 class="text-3xl font-bold mb-6 text-center">Dashboard</h1>
         
         <div class="glass p-6 rounded-3xl mb-6">
+            <h2 class="text-xl font-bold mb-4">Reading Journey</h2>
+            <a href="/static/daring_greatly.pdf" target="_blank" class="block p-4 bg-blue-500/20 rounded-xl hover:bg-blue-500/40 transition text-center font-bold">
+                📖 Read Daring Greatly PDF
+            </a>
+        </div>
+
+        <div class="glass p-6 rounded-3xl mb-6">
             <h2 class="text-xl font-bold mb-4">Today's Mission</h2>
             {% for day, info in daily_plan.items() %}
             <div class="mb-4 p-4 bg-white/10 rounded-xl">
