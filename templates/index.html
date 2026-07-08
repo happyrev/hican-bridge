@@ -2,93 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hican Bridge</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Gradient from Blue to Purple to match I CAN INITIATIVE branding */
         body { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); min-height: 100vh; }
-        .card { 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(10px); 
-            border: 2px solid #3b82f6; 
-        }
-        h1 { color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .btn-blue { background: #3b82f6; }
-        .btn-purple { background: #8b5cf6; }
+        .nav-link { color: white; margin: 0 10px; cursor: pointer; }
     </style>
 </head>
 <body class="p-4">
-    <h1 class="text-3xl font-bold text-white text-center mb-6">Hican Bridge</h1>
-    <div class="card p-4 rounded-xl shadow-lg max-w-md mx-auto">
-        <h2 class="text-lg font-semibold mb-3">Student Profile</h2>
-        <form action="/profile" method="POST" class="space-y-3">
-            <input type="text" name="name" placeholder="Full Name" required class="w-full p-2 border rounded">
-            <input type="number" name="age" placeholder="Age" required class="w-full p-2 border rounded">
-            <select name="sex" class="w-full p-2 border rounded">
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-            </select>
-            <textarea name="about" placeholder="Tell us about yourself..." class="w-full p-2 border rounded"></textarea>
-            <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded">Save Profile</button>
+    <nav class="flex justify-center mb-6">
+        <span class="nav-link" onclick="show('profile')">Profile</span>
+        <span class="nav-link" onclick="show('reading')">Reading</span>
+        <span class="nav-link" onclick="show('chat')">Chat</span>
+    </nav>
+
+    <div id="profile" class="page bg-white p-6 rounded-xl shadow-lg max-w-md mx-auto">
+        <h2 class="text-xl font-bold mb-4">Your Profile</h2>
+        <form action="/profile" method="POST" enctype="multipart/form-data">
+            <input type="text" name="name" placeholder="Name" class="w-full p-2 border mb-2">
+            <input type="file" name="photo" class="mb-2">
+            <button type="submit" class="bg-blue-500 text-white p-2 w-full rounded">Save</button>
         </form>
     </div>
 
-    <div class="card p-4 rounded-xl shadow-lg max-w-md mx-auto mt-6">
-        <h2 class="text-lg font-semibold mb-3">Weekly Report (Voice)</h2>
-        <button id="recordButton" class="w-full bg-red-500 text-white p-2 rounded mb-2 hover:bg-red-600 transition">Record Report</button>
-        <p id="status" class="text-sm text-gray-500 text-center">Click to record your week...</p>
-        <form id="audioForm" action="/upload-audio" method="POST" enctype="multipart/form-data" class="hidden">
-            <input type="file" name="audio" id="audioFile">
-        </form>
-    </div>
-
-    <div class="card p-4 rounded-xl shadow-lg max-w-md mx-auto mt-6">
-        <h2 class="text-lg font-semibold mb-3">Personal Diary</h2>
-        <form action="/diary" method="POST" class="space-y-3">
-            <textarea name="entry" placeholder="Write your thoughts here..." required class="w-full p-2 border rounded h-32"></textarea>
-            <button type="submit" class="w-full bg-purple-500 text-white p-2 rounded hover:bg-purple-600 transition">Save Entry</button>
-        </form>
-    </div>
-
-    <div class="card p-4 rounded-xl shadow-lg max-w-md mx-auto mt-6 mb-10">
-        <h2 class="text-lg font-semibold mb-3">Daily Reading Plan: Daring Greatly</h2>
-        <div class="grid grid-cols-7 gap-2 text-center">
-            {% for day in range(1, 31) %}
-                <div class="p-2 bg-indigo-100 rounded text-xs cursor-pointer hover:bg-indigo-200 transition">Day {{ day }}</div>
-            {% endfor %}
+    <div id="reading" class="page hidden bg-white p-6 rounded-xl shadow-lg max-w-md mx-auto">
+        <h2 class="text-xl font-bold mb-4">Daring Greatly Reading</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <a href="/static/daring_greatly.pdf#page=1" class="p-4 bg-indigo-100 rounded">Week 1: Chapters 1-2</a>
+            <a href="/static/daring_greatly.pdf#page=10" class="p-4 bg-indigo-100 rounded">Week 2: Chapters 3-4</a>
         </div>
     </div>
 
-    <script>
-        let mediaRecorder;
-        let audioChunks = [];
-        const recordButton = document.getElementById('recordButton');
-        const status = document.getElementById('status');
+    <div id="chat" class="page hidden bg-white p-6 rounded-xl shadow-lg max-w-md mx-auto">
+        <h2 class="text-xl font-bold mb-4">Chat with AI</h2>
+        <div id="chat-box" class="h-48 border mb-2 overflow-y-scroll p-2"></div>
+        <input id="chat-input" class="w-full p-2 border mb-2" placeholder="Ask anything...">
+        <button onclick="sendMessage()" class="bg-purple-500 text-white p-2 w-full rounded">Send</button>
+    </div>
 
-        recordButton.onclick = async () => {
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-                recordButton.innerText = 'Record Report';
-            } else {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
-                mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                    const formData = new FormData();
-                    formData.append('audio', audioBlob);
-                    fetch('/upload-audio', { method: 'POST', body: formData })
-                        .then(() => alert('Report submitted!'));
-                    audioChunks = [];
-                };
-                mediaRecorder.start();
-                recordButton.innerText = 'Stop Recording';
-                status.innerText = 'Recording...';
-            }
-        };
+    <script>
+        function show(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            fetch('/chat', { method: 'POST', body: new URLSearchParams({message: input.value}) })
+                .then(r => r.text())
+                .then(text => {
+                    document.getElementById('chat-box').innerHTML += `<p><b>AI:</b> ${text}</p>`;
+                });
+        }
     </script>
 </body>
 </html>
-
