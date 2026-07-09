@@ -8,11 +8,11 @@ from flask import Flask, render_template, request, redirect, session, jsonify, u
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_socketio import SocketIO, emit
-import openai
+from openai import OpenAI
 
 app = Flask(__name__)
 app.secret_key = 'hican_secret_key'
-openai.api_key = os.getenv('OPENAI_API_KEY')
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hican.db'
@@ -35,7 +35,6 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
-# Use absolute path for daily_plan.json
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 plan_path = os.path.join(BASE_DIR, 'daily_plan.json')
 with open(plan_path, 'r') as f:
@@ -101,7 +100,7 @@ def dashboard():
 def check_in():
     day = request.form.get('day')
     answer = request.form.get('answer')
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "system", "content": "Grade this answer on a scale of 0-100 based on the reading."},
                   {"role": "user", "content": f"Reading pages: {daily_plan[day]['pages']}. Question: {daily_plan[day]['question']}. Answer: {answer}"}]
@@ -118,47 +117,27 @@ def submit_report():
         f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d')} | {current_user.name} | {report}\n")
     return redirect(url_for('dashboard'))
 
-@app.route('/admin-reports')
-@login_required
-def admin_reports():
-    if current_user.username != 'admin':
-        return "Unauthorized", 401
-    reports = []
-    report_path = os.path.join(BASE_DIR, 'weekly_reports.txt')
-    if os.path.exists(report_path):
-        with open(report_path, 'r') as f:
-            reports = f.readlines()
-    return render_template('admin.html', reports=reports)
-
 @app.route('/upload-audio', methods=['POST'])
 @login_required
 def upload_audio():
-    print("Received audio upload request")
     if 'audio' not in request.files:
-        print("No audio file in request")
         return jsonify({'error': 'No file'}), 400
     file = request.files['audio']
-    # Save temporarily to process with OpenAI
     temp_path = os.path.join(BASE_DIR, 'temp_audio.webm')
     file.save(temp_path)
     
-    # Transcribe audio via OpenAI Whisper
     with open(temp_path, "rb") as audio_file:
-        transcription = openai.Audio.transcribe("whisper-1", audio_file)
+        transcription = client.audio.transcriptions.create(model="whisper-1", file=audio_file)
     
-    user_text = transcription.text
-    
-    # Get AI Mentor response
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": "You are a supportive Hican Bridge mentor. Help students with their career, academic, and personal challenges."},
-            {"role": "user", "content": user_text}
+            {"role": "system", "content": "You are a supportive Hican Bridge mentor."},
+            {"role": "user", "content": transcription.text}
         ]
     )
-    mentor_response = response.choices[0].message.content
     os.remove(temp_path)
-    return jsonify({'message': mentor_response})
+    return jsonify({'message': response.choices[0].message.content})
 
 if __name__ == '__main__':
     socketio.run(app, debug=False, port=5000)
