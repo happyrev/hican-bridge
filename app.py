@@ -12,7 +12,10 @@ from openai import OpenAI
 
 app = Flask(__name__)
 app.secret_key = 'hican_secret_key'
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+api_key = os.getenv('OPENAI_API_KEY')
+client = OpenAI(api_key=api_key) if api_key else None
+
 socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hican.db'
@@ -98,6 +101,7 @@ def dashboard():
 @app.route('/check-in', methods=['POST'])
 @login_required
 def check_in():
+    if not client: return jsonify({'score': 0}), 500
     day = request.form.get('day')
     answer = request.form.get('answer')
     response = client.chat.completions.create(
@@ -120,6 +124,7 @@ def submit_report():
 @app.route('/upload-audio', methods=['POST'])
 @login_required
 def upload_audio():
+    if not client: return jsonify({'message': 'System unavailable'}), 500
     if 'audio' not in request.files:
         return jsonify({'error': 'No file'}), 400
     file = request.files['audio']
