@@ -1,14 +1,14 @@
 import eventlet
 eventlet.monkey_patch()
-from flask import Flask, render_template, request, redirect, session, jsonify, url_for
 import os
-import openai
 import json
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import random
 import datetime
+from flask import Flask, render_template, request, redirect, session, jsonify, url_for
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_socketio import SocketIO, emit
+import openai
 
 app = Flask(__name__)
 app.secret_key = 'hican_secret_key'
