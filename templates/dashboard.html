@@ -36,25 +36,26 @@
             
             <div class="grid grid-cols-2 gap-4">
                 <div class="glass p-5 rounded-3xl">
-                    <p class="text-xs uppercase opacity-60 mb-1">Badges</p>
-                    <p class="text-4xl font-bold text-indigo-400">5</p>
+                    <p class="text-xs uppercase opacity-60 mb-1">Badges Earned</p>
+                    <p class="text-4xl font-bold text-indigo-400" id="badge-count">0</p>
                 </div>
                 <div class="glass p-5 rounded-3xl">
-                    <p class="text-xs uppercase opacity-60 mb-1">Streak</p>
-                    <p class="text-4xl font-bold text-blue-400">3</p>
+                    <p class="text-xs uppercase opacity-60 mb-1">Current Streak</p>
+                    <p class="text-4xl font-bold text-blue-400" id="streak-count">0</p>
                 </div>
             </div>
 
-            <!-- Status Cards -->
+            <!-- Activities Section -->
             <div class="glass p-5 rounded-3xl">
-                <h3 class="text-sm font-bold opacity-80 mb-3">Quick Actions</h3>
+                <h3 class="text-sm font-bold opacity-80 mb-3">Daily Progress</h3>
                 <div class="space-y-3">
-                    <button class="w-full text-left p-4 bg-white/5 rounded-2xl flex justify-between items-center hover:bg-white/10 transition">
-                        <span>Daily Check-In</span>
-                        <span class="text-green-400">✓</span>
-                    </button>
-                    <div class="p-4 bg-white/5 rounded-2xl">
-                        <p class="text-sm">Next Mentor Session: <span class="font-bold text-indigo-300">Tomorrow, 4PM</span></p>
+                    <div class="w-full p-4 bg-white/5 rounded-2xl flex justify-between items-center border border-white/5">
+                        <span class="text-sm">Daily Reading Check-In</span>
+                        <div class="w-5 h-5 rounded-full border-2 border-slate-600"></div>
+                    </div>
+                    <div class="w-full p-4 bg-white/5 rounded-2xl flex justify-between items-center border border-white/5">
+                        <span class="text-sm">Weekly Report Submission</span>
+                        <div class="w-5 h-5 rounded-full border-2 border-slate-600"></div>
                     </div>
                 </div>
             </div>
