@@ -138,9 +138,26 @@ def upload_audio():
         print("No audio file in request")
         return jsonify({'error': 'No file'}), 400
     file = request.files['audio']
-    # Use standard API to transcribe and respond
-    mentor_response = "I hear you! Keep going with your journey."
-    print(f"File received: {file.filename}, Size: {len(file.read())}")
+    # Save temporarily to process with OpenAI
+    temp_path = os.path.join(BASE_DIR, 'temp_audio.webm')
+    file.save(temp_path)
+    
+    # Transcribe audio via OpenAI Whisper
+    with open(temp_path, "rb") as audio_file:
+        transcription = openai.Audio.transcribe("whisper-1", audio_file)
+    
+    user_text = transcription.text
+    
+    # Get AI Mentor response
+    response = openai.ChatCompletion.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a supportive Hican Bridge mentor. Help students with their career, academic, and personal challenges."},
+            {"role": "user", "content": user_text}
+        ]
+    )
+    mentor_response = response.choices[0].message.content
+    os.remove(temp_path)
     return jsonify({'message': mentor_response})
 
 if __name__ == '__main__':
