@@ -133,11 +133,14 @@ def admin_reports():
 @app.route('/upload-audio', methods=['POST'])
 @login_required
 def upload_audio():
+    print("Received audio upload request")
     if 'audio' not in request.files:
+        print("No audio file in request")
         return jsonify({'error': 'No file'}), 400
     file = request.files['audio']
     # Use standard API to transcribe and respond
     mentor_response = "I hear you! Keep going with your journey."
+    print(f"File received: {file.filename}, Size: {len(file.read())}")
     return jsonify({'message': mentor_response})
 
 if __name__ == '__main__':
