@@ -111,13 +111,23 @@
             mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
             mediaRecorder.onstop = async () => {
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                console.log('Blob size:', audioBlob.size); // Debugging
                 const formData = new FormData();
-                formData.append('audio', audioBlob);
+                formData.append('audio', audioBlob, 'recording.webm');
                     
                 document.getElementById('status').innerText = 'Uploading...';
-                const response = await fetch('/upload-audio', { method: 'POST', body: formData });
-                const result = await response.json();
-                document.getElementById('status').innerText = 'Mentor: ' + result.message;
+                try {
+                    const response = await fetch('/upload-audio', { 
+                        method: 'POST', 
+                        body: formData 
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const result = await response.json();
+                    document.getElementById('status').innerText = 'Mentor: ' + result.message;
+                } catch (e) {
+                    console.error('Upload failed:', e);
+                    document.getElementById('status').innerText = 'Upload failed.';
+                }
             };
             mediaRecorder.start();
             document.getElementById('status').innerText = 'Recording...';
