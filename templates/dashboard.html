@@ -93,15 +93,20 @@
     </nav>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
-    <script>
-        const socket = io();
+<script>
+        const socket = io({
+            transports: ['websocket'],
+            upgrade: false
+        });
         const recordBtn = document.getElementById('recordBtn');
         let mediaRecorder;
 
         async function requestCall() {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.ondataavailable = (e) => socket.emit('audio_data', e.data);
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) socket.emit('audio_data', e.data);
+            };
             mediaRecorder.start(1000); 
             document.getElementById('status').innerText = 'Listening...';
             recordBtn.classList.add('pulse');
@@ -119,6 +124,11 @@
 
         socket.on('audio_response', (data) => {
             document.getElementById('status').innerText = 'Mentor: ' + data.message;
+        });
+
+        socket.on('connect_error', (err) => {
+            console.log('Connection Error:', err);
+            document.getElementById('status').innerText = 'Connection Error. Please refresh.';
         });
 
         function switchTab(tab) {
