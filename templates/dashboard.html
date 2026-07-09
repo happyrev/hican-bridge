@@ -2,135 +2,69 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Hican Bridge Dashboard</title>
+    <title>Hican Bridge</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #0f172a; color: white; min-height: 100vh; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37); }
+        body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
         .gradient-text { background: linear-gradient(to right, #60a5fa, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .btn-glow:hover { box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
-<body class="p-6 bg-slate-950">
-    <div class="max-w-md mx-auto">
-        <h1 class="text-4xl font-extrabold mb-2 text-center gradient-text">Hican Bridge</h1>
-        <p class="text-center text-indigo-300 mb-6 font-medium">Welcome back, {{ user.name }}</p>
-        
-        <div class="glass p-6 rounded-3xl mb-6">
-            <h2 class="text-xl font-bold mb-4">Student Profile</h2>
-            <div class="flex items-center gap-4">
-                <div class="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-2xl">
-                    {{ user.name[0] }}
+<body class="bg-slate-950 pb-20">
+    <div class="max-w-md mx-auto p-6">
+        <h1 class="text-3xl font-extrabold mb-2 gradient-text">Hican Bridge</h1>
+        <p class="text-indigo-300 mb-6">Hi, {{ user.name }}!</p>
+
+        <!-- Tabs Content -->
+        <div id="tab-home" class="tab-content active">
+            <div class="glass p-6 rounded-3xl mb-6 text-center border-l-4 border-indigo-500">
+                <p class="italic text-lg">"{{ quote }}"</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="glass p-4 rounded-2xl text-center">
+                    <p class="text-3xl font-bold text-indigo-400">5</p>
+                    <p class="text-xs uppercase opacity-60">Badges</p>
                 </div>
-                <div>
-                    <p class="font-bold text-lg">{{ user.name }}</p>
-                    <p class="text-sm opacity-70">{{ user.age }} years old</p>
+                <div class="glass p-4 rounded-2xl text-center">
+                    <p class="text-3xl font-bold text-blue-400" id="streak-count">0</p>
+                    <p class="text-xs uppercase opacity-60">Day Streak</p>
                 </div>
             </div>
-            <p class="mt-4 text-sm opacity-80 italic">"{{ user.bio }}"</p>
         </div>
 
-        <!-- Progress Bar -->
-        <div class="glass p-6 rounded-3xl mb-6">
-            <div class="flex justify-between mb-2">
-                <h2 class="text-lg font-bold">Your Journey</h2>
-                <span id="streak-badge" class="bg-indigo-600 px-3 py-1 rounded-full text-xs font-bold">0 Day Streak</span>
-            </div>
-            <div class="w-full bg-slate-800 rounded-full h-3 mb-2">
-                <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
-            </div>
-            <p id="progress-text" class="text-sm opacity-70 font-mono">0% Completed</p>
-        </div>
-
-        <!-- Mentor Connection -->
-        <div class="glass p-6 rounded-3xl mb-6 text-center">
-            <button onclick="requestCall()" class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 py-4 rounded-2xl font-bold text-white transition-all transform hover:scale-105 btn-glow flex items-center justify-center gap-2">
-                <span class="text-xl">📞</span> Talk to your AI Mentor
-            </button>
-        </div>
-
-        <div class="glass p-6 rounded-3xl mb-6">
-            <h2 class="text-xl font-bold mb-4">Weekly Firm Report</h2>
-            <form action="/submit-report" method="POST">
-                <textarea name="report" class="w-full p-4 bg-black/20 rounded-xl text-white placeholder-gray-400" rows="4" placeholder="How did your week at the firm go? What were your highlights and challenges?"></textarea>
-                <button type="submit" class="mt-4 w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-2xl font-bold transition">Submit Report</button>
-            </form>
-        </div>
-
-        <!-- Reading Journey -->
-        <div class="glass p-6 rounded-3xl mb-6">
+        <div id="tab-reading" class="tab-content">
             <h2 class="text-xl font-bold mb-4">Reading Journey</h2>
-            <div class="grid grid-cols-2 gap-2 mb-4">
-                {% for day in range(1, 8) %}
-                <div class="bg-blue-500/20 p-2 rounded-lg text-center text-xs font-bold">Ch {{ day }}</div>
-                {% endfor %}
-            </div>
-            <a href="/static/daring_greatly.pdf" target="_blank" class="block p-4 bg-blue-600 rounded-xl hover:bg-blue-500 transition text-center font-bold">
-                📖 Read Daring Greatly PDF
-            </a>
-        </div>
-
-        <div class="glass p-6 rounded-3xl mb-6">
-            <h2 class="text-xl font-bold mb-4">Today's Mission</h2>
             {% for day, info in daily_plan.items() %}
-            <div class="mb-4 p-4 bg-white/10 rounded-xl flex items-center gap-4">
-                <input type="checkbox" id="check-{{ day }}" class="w-6 h-6 rounded border-0" onchange="toggleDay('{{ day }}')">
-                <div class="flex-grow">
-                    <p class="font-bold">Day {{ day }}: Pages {{ info.pages }}</p>
-                    <p class="text-xs opacity-70">{{ info.question }}</p>
-                    <input id="ans-{{ day }}" class="w-full p-2 mt-2 text-black rounded" placeholder="Your answer">
-                    <button onclick="submitQuiz('{{ day }}')" class="mt-2 w-full bg-green-500 py-1 rounded font-bold">Submit Quiz</button>
-                </div>
+            <div class="glass p-4 rounded-2xl mb-4">
+                <p class="font-bold">Day {{ day }}: {{ info.pages }}</p>
+                <p class="text-sm opacity-70 mb-2">{{ info.question }}</p>
+                <button onclick="alert('Quiz logic here')" class="w-full bg-blue-600 py-2 rounded-xl text-sm">Submit</button>
             </div>
             {% endfor %}
         </div>
+
+        <div id="tab-mentor" class="tab-content text-center">
+            <h2 class="text-xl font-bold mb-6">AI Mentor</h2>
+            <button onclick="requestCall()" class="w-24 h-24 rounded-full bg-indigo-600 flex items-center justify-center text-4xl shadow-lg mx-auto">📞</button>
+            <p class="mt-4 opacity-70">Tap to start voice call</p>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="fixed bottom-0 w-full glass p-4 flex justify-around border-t border-white/10">
+        <button onclick="switchTab('home')">🏠</button>
+        <button onclick="switchTab('reading')">📖</button>
+        <button onclick="switchTab('mentor')">📞</button>
     </div>
 
     <script>
-        function requestCall() {
-            alert('Connecting to your mentor via AI voice...');
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
         }
-
-        function updateProgress() {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            const total = checkboxes.length;
-            const checked = Array.from(checkboxes).filter(c => c.checked).length;
-            const percent = (checked / total) * 100;
-            
-            document.getElementById('progress-bar').style.width = percent + '%';
-            document.getElementById('progress-text').innerText = Math.round(percent) + '% Completed';
-            
-            // Simple streak logic: if all daily missions are checked (stubbed)
-            document.getElementById('streak-badge').innerText = checked + ' Day Streak';
-        }
-
-        function toggleDay(day) {
-            const checkbox = document.getElementById('check-'+day);
-            localStorage.setItem('day-'+day, checkbox.checked);
-            updateProgress();
-        }
-
-        // Restore state and init progress
-        document.querySelectorAll('input[type="checkbox"]').forEach(c => {
-            c.checked = localStorage.getItem(c.id) === 'true';
-        });
-        updateProgress();
-
-        function submitQuiz(day) {
-            const answer = document.getElementById('ans-'+day).value;
-            fetch('/check-in', { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: new URLSearchParams({day: day, answer: answer}) 
-            })
-            .then(r => r.json())
-            .then(data => {
-                alert('Your score for today: ' + data.score + '%');
-                // Auto-check on successful submit
-                document.getElementById('check-'+day).checked = true;
-                toggleDay(day);
-            });
-        }
+        function requestCall() { alert('Connecting to AI Voice Mentor...'); }
     </script>
 </body>
 </html>
