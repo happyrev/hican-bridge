@@ -2,85 +2,94 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hican Bridge</title>
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .gradient-text { background: linear-gradient(to right, #60a5fa, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        .pulse { animation: pulse-glow 2s infinite; }
+        @keyframes pulse-glow { 0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(79, 70, 229, 0); } 100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); } }
     </style>
 </head>
-<body class="bg-slate-950 pb-20">
+<body class="bg-slate-950 pb-24">
     <div class="max-w-md mx-auto p-6">
-        <h1 class="text-3xl font-extrabold mb-2 gradient-text">Hican Bridge</h1>
-        <p class="text-indigo-300 mb-6">Hi, {{ user.name }}!</p>
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-extrabold gradient-text">Hican Bridge</h1>
+                <p class="text-indigo-200 text-lg">Hi, {{ user.name }}!</p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-indigo-900 border-2 border-indigo-500 overflow-hidden">
+                <img src="https://ui-avatars.com/api/?name={{ user.name }}&background=312e81&color=fff" alt="Profile">
+            </div>
+        </header>
 
         <!-- Home Tab -->
-        <div id="tab-home" class="tab-content active">
-            <div class="glass p-6 rounded-3xl mb-6 text-center border-l-4 border-indigo-500">
+        <div id="tab-home" class="tab-content active space-y-4">
+            <div class="glass p-6 rounded-3xl text-center border-l-4 border-indigo-500">
                 <p class="italic text-lg">"{{ quote }}"</p>
             </div>
+            
             <div class="grid grid-cols-2 gap-4">
-                <div class="glass p-4 rounded-2xl text-center">
-                    <p class="text-3xl font-bold text-indigo-400">5</p>
-                    <p class="text-xs uppercase opacity-60">Badges</p>
+                <div class="glass p-5 rounded-3xl">
+                    <p class="text-xs uppercase opacity-60 mb-1">Badges</p>
+                    <p class="text-4xl font-bold text-indigo-400">5</p>
                 </div>
-                <div class="glass p-4 rounded-2xl text-center">
-                    <p class="text-3xl font-bold text-blue-400" id="streak-count">0</p>
-                    <p class="text-xs uppercase opacity-60">Day Streak</p>
+                <div class="glass p-5 rounded-3xl">
+                    <p class="text-xs uppercase opacity-60 mb-1">Streak</p>
+                    <p class="text-4xl font-bold text-blue-400">3</p>
+                </div>
+            </div>
+
+            <!-- Status Cards -->
+            <div class="glass p-5 rounded-3xl">
+                <h3 class="text-sm font-bold opacity-80 mb-3">Quick Actions</h3>
+                <div class="space-y-3">
+                    <button class="w-full text-left p-4 bg-white/5 rounded-2xl flex justify-between items-center hover:bg-white/10 transition">
+                        <span>Daily Check-In</span>
+                        <span class="text-green-400">✓</span>
+                    </button>
+                    <div class="p-4 bg-white/5 rounded-2xl">
+                        <p class="text-sm">Next Mentor Session: <span class="font-bold text-indigo-300">Tomorrow, 4PM</span></p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Reading Tab -->
-        <div id="tab-reading" class="tab-content">
+        <div id="tab-reading" class="tab-content space-y-4">
             <h2 class="text-xl font-bold mb-4">Reading Journey</h2>
-            <a href="/static/daring_greatly.pdf" target="_blank" class="block p-4 bg-blue-600 rounded-xl hover:bg-blue-500 transition text-center font-bold mb-6">
-                📖 Read Daring Greatly PDF
-            </a>
-            <h3 class="font-bold mb-2">Month-Long Reading Plan</h3>
             {% for day, info in daily_plan.items() %}
-            <div class="glass p-4 rounded-2xl mb-4">
-                <p class="font-bold">Week/Chapter {{ day }}</p>
-                <p class="text-xs opacity-60">Pages: {{ info.pages }}</p>
-                <p class="text-sm opacity-90 mt-2">{{ info.question }}</p>
-                <input id="ans-{{ day }}" class="w-full p-2 mt-2 bg-slate-900 rounded text-sm" placeholder="Your reflection...">
-                <button onclick="submitQuiz('{{ day }}')" class="mt-2 w-full bg-green-600 py-1 rounded text-sm font-bold">Submit</button>
+            <div class="glass p-5 rounded-3xl">
+                <p class="font-bold text-indigo-300">Chapter {{ day }}</p>
+                <p class="text-sm opacity-80 mt-1">{{ info.question }}</p>
+                <input id="ans-{{ day }}" class="w-full p-3 mt-3 bg-slate-900/50 rounded-2xl border border-white/10 text-sm" placeholder="Your reflection...">
+                <button onclick="submitQuiz('{{ day }}')" class="mt-3 w-full bg-indigo-600 py-3 rounded-2xl text-sm font-bold hover:bg-indigo-500 transition">Submit Reflection</button>
             </div>
             {% endfor %}
         </div>
 
-        <!-- Weekly Report Tab -->
-        <div id="tab-report" class="tab-content">
-            <h2 class="text-xl font-bold mb-4">Weekly Firm Report</h2>
-            <form action="/submit-report" method="POST">
-                <textarea name="report" class="w-full p-4 bg-slate-900 rounded-xl text-white border border-white/10" rows="4" placeholder="How did your week at the firm go?"></textarea>
-                <button type="submit" class="mt-4 w-full bg-blue-600 py-3 rounded-2xl font-bold">Submit Report</button>
-            </form>
-        </div>
-
         <!-- Mentor Tab -->
-        <div id="tab-mentor" class="tab-content text-center">
-            <h2 class="text-xl font-bold mb-6">AI Mentor</h2>
-            <div id="status" class="mb-4 text-sm opacity-70">Ready to listen</div>
-            <button id="recordBtn" class="w-24 h-24 rounded-full bg-indigo-600 flex items-center justify-center text-4xl shadow-lg mx-auto hover:bg-indigo-500 transition">🎤</button>
-            <p class="mt-4 opacity-70">Tap to talk to your mentor</p>
+        <div id="tab-mentor" class="tab-content text-center pt-10">
+            <div class="glass p-8 rounded-3xl inline-block w-full">
+                <h2 class="text-xl font-bold mb-6">AI Mentor</h2>
+                <button id="recordBtn" class="w-32 h-32 rounded-full bg-indigo-600 flex items-center justify-center text-5xl shadow-xl mx-auto transition">🎤</button>
+                <p id="status" class="mt-6 text-indigo-200 font-medium">Tap to start mentoring</p>
+            </div>
         </div>
     </div>
 
     <!-- Bottom Nav -->
-    <div class="fixed bottom-0 w-full glass p-4 flex justify-around border-t border-white/10">
-        <button onclick="switchTab('home')">🏠</button>
-        <button onclick="switchTab('reading')">📖</button>
-        <button onclick="switchTab('report')">📝</button>
-        <button onclick="switchTab('mentor')">📞</button>
-        <a href="/logout">🚪</a>
-    </div>
+    <nav class="fixed bottom-0 w-full glass p-5 flex justify-around border-t border-white/10 backdrop-blur-xl">
+        <button onclick="switchTab('home')" class="text-2xl opacity-60 hover:opacity-100">🏠</button>
+        <button onclick="switchTab('reading')" class="text-2xl opacity-60 hover:opacity-100">📖</button>
+        <button onclick="switchTab('mentor')" class="text-2xl opacity-60 hover:opacity-100">📞</button>
+        <a href="/logout" class="text-2xl">🚪</a>
+    </nav>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
     <script>
@@ -94,14 +103,14 @@
             mediaRecorder.ondataavailable = (e) => socket.emit('audio_data', e.data);
             mediaRecorder.start(1000); 
             document.getElementById('status').innerText = 'Listening...';
-            recordBtn.innerText = '⏹️';
+            recordBtn.classList.add('pulse');
         }
 
         recordBtn.onclick = () => {
             if (mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
                 document.getElementById('status').innerText = 'Processing...';
-                recordBtn.innerText = '🎤';
+                recordBtn.classList.remove('pulse');
             } else {
                 requestCall();
             }
