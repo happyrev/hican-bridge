@@ -17,7 +17,7 @@
         <h1 class="text-3xl font-extrabold mb-2 gradient-text">Hican Bridge</h1>
         <p class="text-indigo-300 mb-6">Hi, {{ user.name }}!</p>
 
-        <!-- Tabs Content -->
+        <!-- Home Tab -->
         <div id="tab-home" class="tab-content active">
             <div class="glass p-6 rounded-3xl mb-6 text-center border-l-4 border-indigo-500">
                 <p class="italic text-lg">"{{ quote }}"</p>
@@ -34,6 +34,7 @@
             </div>
         </div>
 
+        <!-- Reading Tab -->
         <div id="tab-reading" class="tab-content">
             <h2 class="text-xl font-bold mb-4">Reading Journey</h2>
             <a href="/static/daring_greatly.pdf" target="_blank" class="block p-4 bg-blue-600 rounded-xl hover:bg-blue-500 transition text-center font-bold mb-6">
@@ -51,14 +52,16 @@
             {% endfor %}
         </div>
 
+        <!-- Mentor Tab -->
         <div id="tab-mentor" class="tab-content text-center">
             <h2 class="text-xl font-bold mb-6">AI Mentor</h2>
-            <button onclick="requestCall()" class="w-24 h-24 rounded-full bg-indigo-600 flex items-center justify-center text-4xl shadow-lg mx-auto">📞</button>
-            <p class="mt-4 opacity-70">Tap to start voice call</p>
+            <div id="status" class="mb-4 text-sm opacity-70">Ready to listen</div>
+            <button id="recordBtn" class="w-24 h-24 rounded-full bg-indigo-600 flex items-center justify-center text-4xl shadow-lg mx-auto hover:bg-indigo-500 transition">🎤</button>
+            <p class="mt-4 opacity-70">Tap to talk to your mentor</p>
         </div>
     </div>
 
-        <!-- Bottom Nav -->
+    <!-- Bottom Nav -->
     <div class="fixed bottom-0 w-full glass p-4 flex justify-around border-t border-white/10">
         <button onclick="switchTab('home')">🏠</button>
         <button onclick="switchTab('reading')">📖</button>
@@ -66,12 +69,50 @@
         <a href="/logout">🚪</a>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
     <script>
+        const socket = io();
+        const recordBtn = document.getElementById('recordBtn');
+        let mediaRecorder;
+
+        async function requestCall() {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = (e) => socket.emit('audio_data', e.data);
+            mediaRecorder.start(1000); 
+            document.getElementById('status').innerText = 'Listening...';
+            recordBtn.innerText = '⏹️';
+        }
+
+        recordBtn.onclick = () => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                document.getElementById('status').innerText = 'Processing...';
+                recordBtn.innerText = '🎤';
+            } else {
+                requestCall();
+            }
+        };
+
+        socket.on('audio_response', (data) => {
+            document.getElementById('status').innerText = 'Mentor: ' + data.message;
+        });
+
         function switchTab(tab) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-' + tab).classList.add('active');
         }
-        function requestCall() { alert('Connecting to AI Voice Mentor...'); }
+
+        function submitQuiz(day) {
+            const answer = document.getElementById('ans-'+day).value;
+            fetch('/check-in', { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: new URLSearchParams({day: day, answer: answer}) 
+            })
+            .then(r => r.json())
+            .then(data => alert('Your score for today: ' + data.score + '%'));
+        }
     </script>
 </body>
 </html>
