@@ -13,9 +13,7 @@ import openai
 app = Flask(__name__)
 app.secret_key = 'hican_secret_key'
 openai.api_key = os.getenv('OPENAI_API_KEY')
-# Remove explicit async_mode to let library auto-detect based on installed dependencies (eventlet/gevent)
-socketio = SocketIO(app, cors_allowed_origins="*")
-
+socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hican.db'
 db = SQLAlchemy(app)
@@ -37,7 +35,10 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
-with open('daily_plan.json', 'r') as f:
+# Use absolute path for daily_plan.json
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+plan_path = os.path.join(BASE_DIR, 'daily_plan.json')
+with open(plan_path, 'r') as f:
     daily_plan = json.load(f)
 
 @app.route('/')
@@ -112,7 +113,8 @@ def check_in():
 @login_required
 def submit_report():
     report = request.form.get('report')
-    with open('weekly_reports.txt', 'a') as f:
+    report_path = os.path.join(BASE_DIR, 'weekly_reports.txt')
+    with open(report_path, 'a') as f:
         f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d')} | {current_user.name} | {report}\n")
     return redirect(url_for('dashboard'))
 
@@ -122,16 +124,16 @@ def admin_reports():
     if current_user.username != 'admin':
         return "Unauthorized", 401
     reports = []
-    if os.path.exists('weekly_reports.txt'):
-        with open('weekly_reports.txt', 'r') as f:
+    report_path = os.path.join(BASE_DIR, 'weekly_reports.txt')
+    if os.path.exists(report_path):
+        with open(report_path, 'r') as f:
             reports = f.readlines()
     return render_template('admin.html', reports=reports)
 
-# Add logging to the audio handler for better visibility
 @socketio.on('audio_data')
 def handle_audio(data):
     try:
-        print("Received audio data packet") # Log in Render console
+        print("Received audio data packet")
         response = openai.ChatCompletion.create(
             model="gpt-4o",
             messages=[{"role": "system", "content": "You are a supportive Hican Bridge mentor. Keep responses short."},
@@ -140,7 +142,7 @@ def handle_audio(data):
         mentor_response = response.choices[0].message.content
         emit('audio_response', {'message': mentor_response})
     except Exception as e:
-        print(f"Error processing audio: {e}") # Log error in Render console
+        print(f"Error processing audio: {e}")
         emit('audio_response', {'message': "I'm sorry, I'm having trouble connecting. Let's try again!"})
 
 if __name__ == '__main__':
