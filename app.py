@@ -13,7 +13,7 @@ import openai
 app = Flask(__name__)
 app.secret_key = 'hican_secret_key'
 openai.api_key = os.getenv('OPENAI_API_KEY')
-socketio = SocketIO(app, async_mode='gevent')
+socketio = SocketIO(app, async_mode='eventlet')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hican.db'
 db = SQLAlchemy(app)
