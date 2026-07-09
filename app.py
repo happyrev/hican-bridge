@@ -39,7 +39,7 @@ with open('daily_plan.json', 'r') as f:
 def home():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    return render_template('index.html') # Assuming index.html is your landing/register-prompt page
+    return redirect(url_for('login')) # Assuming index.html is your landing/register-prompt page
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
