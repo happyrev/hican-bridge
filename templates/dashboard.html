@@ -94,12 +94,9 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
 <script>
-    const socket = io({
-        transports: ['websocket'],
-        upgrade: false
-    });
     const recordBtn = document.getElementById('recordBtn');
     let mediaRecorder;
+    let audioChunks = [];
 
     function switchTab(tab) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -109,37 +106,36 @@
     async function requestCall() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) socket.emit('audio_data', e.data);
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const formData = new FormData();
+                formData.append('audio', audioBlob);
+                    
+                document.getElementById('status').innerText = 'Uploading...';
+                const response = await fetch('/upload-audio', { method: 'POST', body: formData });
+                const result = await response.json();
+                document.getElementById('status').innerText = 'Mentor: ' + result.message;
             };
-            mediaRecorder.start(1000); 
-            document.getElementById('status').innerText = 'Listening...';
+            mediaRecorder.start();
+            document.getElementById('status').innerText = 'Recording...';
             recordBtn.classList.add('pulse');
         } catch (err) {
-            console.error('Mic access error:', err);
-            document.getElementById('status').innerText = 'Microphone access denied';
+            console.error(err);
+            document.getElementById('status').innerText = 'Mic access denied';
         }
     }
 
     recordBtn.onclick = () => {
         if (mediaRecorder && mediaRecorder.state === 'recording') {
             mediaRecorder.stop();
-            document.getElementById('status').innerText = 'Processing...';
             recordBtn.classList.remove('pulse');
         } else {
             requestCall();
         }
     };
-
-    socket.on('audio_response', (data) => {
-        document.getElementById('status').innerText = 'Mentor: ' + data.message;
-    });
-
-    socket.on('connect_error', (err) => {
-        console.log('Connection Error:', err);
-        document.getElementById('status').innerText = 'Connection Error. Please refresh.';
-    });
 
     function submitQuiz(day) {
         const answer = document.getElementById('ans-'+day).value;

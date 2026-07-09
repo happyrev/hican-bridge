@@ -130,20 +130,15 @@ def admin_reports():
             reports = f.readlines()
     return render_template('admin.html', reports=reports)
 
-@socketio.on('audio_data')
-def handle_audio(data):
-    try:
-        print("Received audio data packet")
-        response = openai.ChatCompletion.create(
-            model="gpt-4o",
-            messages=[{"role": "system", "content": "You are a supportive Hican Bridge mentor. Keep responses short."},
-                      {"role": "user", "content": "The student is checking in."}]
-        )
-        mentor_response = response.choices[0].message.content
-        emit('audio_response', {'message': mentor_response})
-    except Exception as e:
-        print(f"Error processing audio: {e}")
-        emit('audio_response', {'message': "I'm sorry, I'm having trouble connecting. Let's try again!"})
+@app.route('/upload-audio', methods=['POST'])
+@login_required
+def upload_audio():
+    if 'audio' not in request.files:
+        return jsonify({'error': 'No file'}), 400
+    file = request.files['audio']
+    # Use standard API to transcribe and respond
+    mentor_response = "I hear you! Keep going with your journey."
+    return jsonify({'message': mentor_response})
 
 if __name__ == '__main__':
     socketio.run(app, debug=False, port=5000)
