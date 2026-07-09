@@ -48,9 +48,15 @@
             </form>
         </div>
 
+        <!-- Reading Journey -->
         <div class="glass p-6 rounded-3xl mb-6">
             <h2 class="text-xl font-bold mb-4">Reading Journey</h2>
-            <a href="/static/daring_greatly.pdf" target="_blank" class="block p-4 bg-blue-500/20 rounded-xl hover:bg-blue-500/40 transition text-center font-bold">
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                {% for day in range(1, 8) %}
+                <div class="bg-blue-500/20 p-2 rounded-lg text-center text-xs font-bold">Ch {{ day }}</div>
+                {% endfor %}
+            </div>
+            <a href="/static/daring_greatly.pdf" target="_blank" class="block p-4 bg-blue-600 rounded-xl hover:bg-blue-500 transition text-center font-bold">
                 📖 Read Daring Greatly PDF
             </a>
         </div>
