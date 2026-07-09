@@ -6,10 +6,12 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import random
 import datetime
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.secret_key = 'hican_secret_key'
 openai.api_key = os.getenv('OPENAI_API_KEY')
+socketio = SocketIO(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hican.db'
 db = SQLAlchemy(app)
@@ -28,7 +30,6 @@ class User(UserMixin, db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Create tables
 with app.app_context():
     db.create_all()
 
@@ -39,7 +40,7 @@ with open('daily_plan.json', 'r') as f:
 def home():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    return redirect(url_for('login')) # Assuming index.html is your landing/register-prompt page
+    return redirect(url_for('login'))
 
 @app.route('/logout')
 @login_required
@@ -114,14 +115,17 @@ def submit_report():
 @app.route('/admin-reports')
 @login_required
 def admin_reports():
-    # Basic security check for MVP: ensure the user is an admin
-    # In a real app, use a role system
     if current_user.username != 'admin':
         return "Unauthorized", 401
-    
     reports = []
     if os.path.exists('weekly_reports.txt'):
         with open('weekly_reports.txt', 'r') as f:
             reports = f.readlines()
-    
     return render_template('admin.html', reports=reports)
+
+@socketio.on('audio_data')
+def handle_audio(data):
+    emit('audio_response', {'message': 'Voice processing active'})
+
+if __name__ == '__main__':
+    socketio.run(app, debug=False, port=5000)
