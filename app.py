@@ -13,7 +13,9 @@ import openai
 app = Flask(__name__)
 app.secret_key = 'hican_secret_key'
 openai.api_key = os.getenv('OPENAI_API_KEY')
-socketio = SocketIO(app, async_mode='eventlet')
+# Remove explicit async_mode to let library auto-detect based on installed dependencies (eventlet/gevent)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hican.db'
 db = SQLAlchemy(app)
