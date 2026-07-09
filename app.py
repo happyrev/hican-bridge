@@ -125,6 +125,7 @@ def admin_reports():
 
 @socketio.on('audio_data')
 def handle_audio(data):
+    print("Received audio data chunk")
     emit('audio_response', {'message': 'Voice processing active'})
 
 if __name__ == '__main__':
