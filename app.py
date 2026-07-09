@@ -126,7 +126,16 @@ def admin_reports():
 @socketio.on('audio_data')
 def handle_audio(data):
     print("Received audio data chunk")
-    emit('audio_response', {'message': 'Voice processing active'})
+    # For MVP, simulate a response while you finalize the Whisper/TTS setup
+    # In production, you would save 'data' to a temp file and send to Whisper
+    # Here is the logic placeholder for the LLM response:
+    response = openai.ChatCompletion.create(
+        model="gpt-4o",
+        messages=[{"role": "system", "content": "You are a supportive Hican Bridge mentor. Keep responses short and spoken-style."},
+                  {"role": "user", "content": "The student is checking in."}]
+    )
+    mentor_response = response.choices[0].message.content
+    emit('audio_response', {'message': mentor_response})
 
 if __name__ == '__main__':
     socketio.run(app, debug=False, port=5000)
