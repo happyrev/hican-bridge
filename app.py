@@ -41,10 +41,19 @@ def home():
         return redirect(url_for('dashboard'))
     return redirect(url_for('login')) # Assuming index.html is your landing/register-prompt page
 
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
     if request.method == 'POST':
-        user = User.query.filter_by(username=request.form['username']).first()
+        username = request.form.get('username')
+        user = User.query.filter_by(username=username).first()
         if user:
             login_user(user)
             return redirect(url_for('dashboard'))
