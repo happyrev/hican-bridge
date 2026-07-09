@@ -52,6 +52,15 @@
             {% endfor %}
         </div>
 
+        <!-- Weekly Report Tab -->
+        <div id="tab-report" class="tab-content">
+            <h2 class="text-xl font-bold mb-4">Weekly Firm Report</h2>
+            <form action="/submit-report" method="POST">
+                <textarea name="report" class="w-full p-4 bg-slate-900 rounded-xl text-white border border-white/10" rows="4" placeholder="How did your week at the firm go?"></textarea>
+                <button type="submit" class="mt-4 w-full bg-blue-600 py-3 rounded-2xl font-bold">Submit Report</button>
+            </form>
+        </div>
+
         <!-- Mentor Tab -->
         <div id="tab-mentor" class="tab-content text-center">
             <h2 class="text-xl font-bold mb-6">AI Mentor</h2>
@@ -65,6 +74,7 @@
     <div class="fixed bottom-0 w-full glass p-4 flex justify-around border-t border-white/10">
         <button onclick="switchTab('home')">🏠</button>
         <button onclick="switchTab('reading')">📖</button>
+        <button onclick="switchTab('report')">📝</button>
         <button onclick="switchTab('mentor')">📞</button>
         <a href="/logout">🚪</a>
     </div>
