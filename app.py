@@ -125,9 +125,11 @@ def admin_reports():
             reports = f.readlines()
     return render_template('admin.html', reports=reports)
 
+# Add logging to the audio handler for better visibility
 @socketio.on('audio_data')
 def handle_audio(data):
     try:
+        print("Received audio data packet") # Log in Render console
         response = openai.ChatCompletion.create(
             model="gpt-4o",
             messages=[{"role": "system", "content": "You are a supportive Hican Bridge mentor. Keep responses short."},
@@ -136,6 +138,7 @@ def handle_audio(data):
         mentor_response = response.choices[0].message.content
         emit('audio_response', {'message': mentor_response})
     except Exception as e:
+        print(f"Error processing audio: {e}") # Log error in Render console
         emit('audio_response', {'message': "I'm sorry, I'm having trouble connecting. Let's try again!"})
 
 if __name__ == '__main__':
