@@ -1,26 +1,68 @@
-
-from flask import Flask, render_template, request, redirect, session, jsonify
+from flask import Flask, render_template, request, redirect, session, jsonify, url_for
 import os
 import openai
 import json
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+import random
+import datetime
 
 app = Flask(__name__)
 app.secret_key = 'hican_secret_key'
 openai.api_key = os.getenv('OPENAI_API_KEY')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hican.db'
+db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    name = db.Column(db.String(120), nullable=False)
+    age = db.Column(db.Integer)
+    bio = db.Column(db.Text)
+    photo = db.Column(db.String(200))
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+# Create tables
+with app.app_context():
+    db.create_all()
 
 with open('daily_plan.json', 'r') as f:
     daily_plan = json.load(f)
 
 @app.route('/')
 def home():
-    if 'profile' in session:
-        return redirect('/dashboard')
-    return render_template('index.html')
+    return redirect(url_for('dashboard'))
 
-import random
-import datetime
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        user = User.query.filter_by(username=request.form['username']).first()
+        if user:
+            login_user(user)
+            return redirect(url_for('dashboard'))
+    return render_template('login.html')
 
-# Mock function for daily quote
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        new_user = User(
+            username=request.form['username'],
+            name=request.form['name'],
+            age=request.form.get('age', 0),
+            bio=request.form.get('bio', '')
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        login_user(new_user)
+        return redirect(url_for('dashboard'))
+    return render_template('register.html')
+
 def get_daily_quote():
     quotes = [
         "Believe you can and you're halfway there.",
@@ -29,20 +71,19 @@ def get_daily_quote():
         "Embrace vulnerability as your greatest strength.",
         "Leadership is about service to others."
     ]
-    # Simple deterministic choice based on day of year
     return quotes[datetime.datetime.now().timetuple().tm_yday % len(quotes)]
 
 @app.route('/dashboard')
+@login_required
 def dashboard():
     quote = get_daily_quote()
-    return render_template('dashboard.html', profile=session.get('profile'), daily_plan=daily_plan, quote=quote)
+    return render_template('dashboard.html', user=current_user, daily_plan=daily_plan, quote=quote)
 
 @app.route('/check-in', methods=['POST'])
+@login_required
 def check_in():
     day = request.form.get('day')
     answer = request.form.get('answer')
-    
-    # AI Grade
     response = openai.ChatCompletion.create(
         model="gpt-4o",
         messages=[{"role": "system", "content": "Grade this answer on a scale of 0-100 based on the reading."},
@@ -52,12 +93,12 @@ def check_in():
     return jsonify({'score': score})
 
 @app.route('/submit-report', methods=['POST'])
+@login_required
 def submit_report():
     report = request.form.get('report')
-    # Save to file or database
     with open('weekly_reports.txt', 'a') as f:
-        f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d')} | {report}\n")
-    return redirect('/dashboard')
+        f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d')} | {current_user.name} | {report}\n")
+    return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
     app.run(debug=False, port=5000)
