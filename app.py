@@ -111,5 +111,17 @@ def submit_report():
         f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d')} | {current_user.name} | {report}\n")
     return redirect(url_for('dashboard'))
 
-if __name__ == '__main__':
-    app.run(debug=False, port=5000)
+@app.route('/admin-reports')
+@login_required
+def admin_reports():
+    # Basic security check for MVP: ensure the user is an admin
+    # In a real app, use a role system
+    if current_user.username != 'admin':
+        return "Unauthorized", 401
+    
+    reports = []
+    if os.path.exists('weekly_reports.txt'):
+        with open('weekly_reports.txt', 'r') as f:
+            reports = f.readlines()
+    
+    return render_template('admin.html', reports=reports)
