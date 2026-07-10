@@ -71,6 +71,9 @@
         <!-- Reading Tab -->
         <div id="tab-reading" class="tab-content space-y-4">
             <h2 class="text-xl font-bold mb-4">Reading Journey</h2>
+            <a href="/static/daring_greatly.pdf" target="_blank" class="block w-full p-4 bg-indigo-900/50 rounded-2xl border border-indigo-500/30 text-center font-bold text-indigo-300 hover:bg-indigo-800 transition">
+                📖 Open 'Daring Greatly' PDF
+            </a>
             {% for day, info in daily_plan.items() %}
             <div class="glass p-5 rounded-3xl">
                 <p class="font-bold text-indigo-300">Chapter {{ day }}</p>
