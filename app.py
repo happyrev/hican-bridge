@@ -169,8 +169,9 @@ def upload_audio():
     client = OpenAI(api_key=api_key)
     
     file = request.files['audio']
-    # Use a user-specific temp file to prevent race conditions
-    temp_path = os.path.join(BASE_DIR, f'temp_audio_{current_user.id}.webm')
+    # Use a safer temporary path for Render's ephemeral filesystem
+    # Render only allows writing to /tmp
+    temp_path = os.path.join('/tmp', f'temp_audio_{current_user.id}.webm')
     file.save(temp_path)
     
     try:
