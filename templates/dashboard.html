@@ -20,55 +20,28 @@
 </head>
 <body class="bg-slate-950 pb-24">
     <div class="max-w-md mx-auto p-6">
-        <!-- Header -->
         <header class="flex items-center justify-between mb-8">
             <div>
                 <h1 class="text-3xl font-extrabold gradient-text">Hican Bridge</h1>
                 <p class="text-indigo-200 text-lg">Hi, {{ user.name }}!</p>
             </div>
-            <div class="w-12 h-12 rounded-full bg-indigo-900 border-2 border-indigo-500 overflow-hidden">
-                <img src="https://ui-avatars.com/api/?name={{ user.name }}&background=312e81&color=fff" alt="Profile">
-            </div>
         </header>
 
-        <!-- Home Tab -->
         <div id="tab-home" class="tab-content active space-y-4">
             <div class="glass p-6 rounded-3xl text-center border-l-4 border-indigo-500">
                 <p class="italic text-lg">"{{ quote }}"</p>
             </div>
             
-            <div class="grid grid-cols-2 gap-4">
-                <div class="glass p-5 rounded-3xl">
-                    <p class="text-xs uppercase opacity-60 mb-1">Badges Earned</p>
-                    <div class="flex gap-2">
-                        {% for badge in badges %}
-                            <span class="text-2xl" title="{{ badge.name }}">{{ badge.icon }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="glass p-5 rounded-3xl">
-                    <p class="text-xs uppercase opacity-60 mb-1">Current Streak</p>
-                    <p class="text-4xl font-bold text-blue-400" id="streak-count">0</p>
-                </div>
-            </div>
-
-            <!-- Activities Section -->
             <div class="glass p-5 rounded-3xl">
-                <h3 class="text-sm font-bold opacity-80 mb-3">Daily Progress</h3>
-                <div class="space-y-3">
-                    <div class="w-full p-4 bg-white/5 rounded-2xl flex justify-between items-center border border-white/5">
-                        <span class="text-sm">Daily Reading Check-In</span>
-                        <div class="w-5 h-5 rounded-full border-2 border-slate-600"></div>
-                    </div>
-                    <div class="w-full p-4 bg-white/5 rounded-2xl flex justify-between items-center border border-white/5">
-                        <span class="text-sm">Weekly Report Submission</span>
-                        <div class="w-5 h-5 rounded-full border-2 border-slate-600"></div>
-                    </div>
+                <p class="text-xs uppercase opacity-60 mb-1">Badges Earned</p>
+                <div class="flex gap-2">
+                    {% for badge in badges %}
+                        <span class="text-2xl" title="{{ badge.name }}">{{ badge.icon }}</span>
+                    {% endfor %}
                 </div>
             </div>
         </div>
 
-        <!-- Reading Tab -->
         <div id="tab-reading" class="tab-content space-y-4">
             <h2 class="text-xl font-bold mb-4">Reading Journey</h2>
             <a href="/static/daring_greatly.pdf" target="_blank" class="block w-full p-4 bg-indigo-900/50 rounded-2xl border border-indigo-500/30 text-center font-bold text-indigo-300 hover:bg-indigo-800 transition">
@@ -84,7 +57,6 @@
             {% endfor %}
         </div>
 
-        <!-- Journal Tab -->
         <div id="tab-journal" class="tab-content space-y-4">
             <h2 class="text-xl font-bold mb-4">My Thoughts</h2>
             <form action="/journal" method="POST" class="glass p-5 rounded-3xl">
@@ -101,7 +73,6 @@
             </div>
         </div>
 
-        <!-- Report Tab -->
         <div id="tab-report" class="tab-content space-y-4">
             <h2 class="text-xl font-bold mb-4">Weekly Report</h2>
             <form action="/submit-report" method="POST" class="glass p-5 rounded-3xl">
@@ -110,89 +81,71 @@
             </form>
         </div>
 
-        <!-- Mentor Tab -->
         <div id="tab-mentor" class="tab-content text-center pt-10">
             <div class="glass p-8 rounded-3xl inline-block w-full">
-                <h2 class="text-xl font-bold mb-6">AI Mentor (Live)</h2>
+                <h2 class="text-xl font-bold mb-6">AI Mentor</h2>
                 <button id="toggleRecord" class="w-32 h-32 rounded-full bg-indigo-600 flex items-center justify-center text-5xl shadow-xl mx-auto transition">🎤</button>
-                <p id="status" class="mt-6 text-indigo-200 font-medium">Click to start live chat</p>
-                <div id="transcript" class="mt-4 text-sm text-indigo-100 italic"></div>
+                <p id="status" class="mt-6 text-indigo-200 font-medium">Click to talk to your mentor</p>
             </div>
             <a href="/logout" class="block mt-6 text-red-400 font-bold">Logout</a>
         </div>
     </div>
 
-    <!-- Bottom Nav -->
     <nav class="fixed bottom-0 w-full glass p-5 flex justify-around border-t border-white/10 backdrop-blur-xl">
-        <button onclick="switchTab('home')" class="text-2xl opacity-60 hover:opacity-100">🏠</button>
-        <button onclick="switchTab('reading')" class="text-2xl opacity-60 hover:opacity-100">📖</button>
-        <button onclick="switchTab('journal')" class="text-2xl opacity-60 hover:opacity-100">✍️</button>
-        <button onclick="switchTab('report')" class="text-2xl opacity-60 hover:opacity-100">📋</button>
-        <button onclick="switchTab('mentor')" class="text-2xl opacity-60 hover:opacity-100">📞</button>
+        <button onclick="switchTab('home')" class="text-2xl">🏠</button>
+        <button onclick="switchTab('reading')" class="text-2xl">📖</button>
+        <button onclick="switchTab('journal')" class="text-2xl">✍️</button>
+        <button onclick="switchTab('report')" class="text-2xl">📋</button>
+        <button onclick="switchTab('mentor')" class="text-2xl">📞</button>
     </nav>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
-<script>
-    const socket = io();
-    const toggleRecord = document.getElementById('toggleRecord');
-    const status = document.getElementById('status');
-    let mediaRecorder;
-    let isRecording = false;
+    <script>
+        const toggleRecord = document.getElementById('toggleRecord');
+        const status = document.getElementById('status');
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
 
-    // Switch to simple POST-based audio upload, completely bypassing WebSockets.
-    // This is the most reliable way to handle audio on Render within your deadline.
-    toggleRecord.onclick = async () => {
-        if (!isRecording) {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-            audioChunks = [];
-            
-            mediaRecorder.ondataavailable = (event) => audioChunks.push(event.data);
-            mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                const formData = new FormData();
-                formData.append('audio', audioBlob, 'recording.webm');
-                
-                status.innerText = 'Sending to Mentor...';
-                try {
-                    const response = await fetch('/upload-audio', { method: 'POST', body: formData });
-                    const result = await response.json();
-                    if (result.message) {
-                        status.innerText = 'Mentor: ' + result.message;
-                    } else {
-                        status.innerText = 'Error: ' + result.error;
-                    }
-                } catch (e) {
-                    status.innerText = 'Upload failed.';
-                }
-            };
-            
-            mediaRecorder.start();
-            isRecording = true;
-            status.innerText = 'Recording...';
-            toggleRecord.classList.add('pulse');
-        } else {
-            mediaRecorder.stop();
-            isRecording = false;
-            toggleRecord.classList.remove('pulse');
+        toggleRecord.onclick = async () => {
+            if (!isRecording) {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                audioChunks = [];
+                mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    const formData = new FormData();
+                    formData.append('audio', new Blob(audioChunks, { type: 'audio/webm' }));
+                    status.innerText = 'Processing...';
+                    const res = await fetch('/upload-audio', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    status.innerText = data.message || 'Error: ' + data.error;
+                };
+                mediaRecorder.start();
+                isRecording = true;
+                status.innerText = 'Recording...';
+                toggleRecord.classList.add('pulse');
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                toggleRecord.classList.remove('pulse');
+            }
+        };
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
         }
-    };
 
-    function switchTab(tab) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.getElementById('tab-' + tab).classList.add('active');
-    }
-
-    function submitQuiz(day) {
-        const answer = document.getElementById('ans-'+day).value;
-        fetch('/check-in', { 
-            method: 'POST', 
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: new URLSearchParams({day: day, answer: answer}) 
-        })
-        .then(r => r.json())
-        .then(data => alert('Your score for today: ' + data.score + '%'));
-    }
-</script>
+        function submitQuiz(day) {
+            const answer = document.getElementById('ans-'+day).value;
+            fetch('/check-in', { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: new URLSearchParams({day: day, answer: answer}) 
+            })
+            .then(r => r.json())
+            .then(data => alert('Score: ' + data.score + '%'));
+        }
+    </script>
 </body>
 </html>
