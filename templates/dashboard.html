@@ -46,9 +46,14 @@
             <h2 class="text-xl font-bold mb-4">Day {{ day }} Journey</h2>
             <div class="glass p-5 rounded-3xl">
                 <p class="font-bold text-indigo-300">Today's Goal: {{ info.pages }}</p>
-                <p class="text-sm opacity-80 mt-1">Once done reading, answer these 5 questions:</p>
-                <div class="mt-4 space-y-2">
-                    <textarea id="quiz-response" class="w-full p-3 bg-slate-900/50 rounded-2xl border border-white/10 text-sm" placeholder="Write your answers to the 5 questions here..." rows="5"></textarea>
+                <div class="mt-4 p-4 bg-white/5 rounded-2xl">
+                    <p class="text-sm opacity-80 mb-4 italic">"Please finish reading today's pages before answering the daily questions."</p>
+                </div>
+                <div id="quiz-section" class="mt-4 space-y-2">
+                    <p class="text-sm font-bold">1. {{ info.question.split('|')[0] }}</p>
+                    <textarea id="ans-1" class="w-full p-2 bg-slate-900/50 rounded-lg border border-white/10 text-sm" rows="2"></textarea>
+                    <p class="text-sm font-bold">2. {{ info.question.split('|')[1] }}</p>
+                    <textarea id="ans-2" class="w-full p-2 bg-slate-900/50 rounded-lg border border-white/10 text-sm" rows="2"></textarea>
                 </div>
                 <button onclick="submitQuiz('{{ day }}')" class="mt-3 w-full bg-indigo-600 py-3 rounded-2xl text-sm font-bold hover:bg-indigo-500 transition">Submit Answers</button>
             </div>
@@ -134,16 +139,18 @@
         }
 
         function submitQuiz(day) {
-            const answer = document.getElementById('quiz-response').value;
-            if (!answer) return alert("Please write your answers first!");
+            const ans1 = document.getElementById('ans-1').value;
+            const ans2 = document.getElementById('ans-2').value;
+            if (!ans1 || !ans2) return alert("Please answer both questions!");
         
+            const fullAnswer = `Q1: ${ans1} | Q2: ${ans2}`;
             fetch('/check-in', { 
                 method: 'POST', 
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: new URLSearchParams({day: day, answer: answer}) 
+                body: new URLSearchParams({day: day, answer: fullAnswer}) 
             })
             .then(r => r.json())
-            .then(data => alert('Your submission was received. Score: ' + data.score + '%'));
+            .then(data => alert('Your answers were submitted. Great job!'));
         }
     </script>
 </body>
