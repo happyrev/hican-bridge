@@ -30,6 +30,13 @@ class User(UserMixin, db.Model):
     age = db.Column(db.Integer)
     bio = db.Column(db.Text)
     journal_entries = db.relationship('JournalEntry', backref='student', lazy=True)
+    def check_badges(self):
+        badges = []
+        if len(self.journal_entries) >= 3:
+            badges.append({"name": "Journalist", "icon": "✍️"})
+        if len(self.journal_entries) >= 7:
+            badges.append({"name": "Master Writer", "icon": "📖"})
+        return badges
 
 class JournalEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -102,7 +109,8 @@ def get_daily_quote():
 def dashboard():
     quote = get_daily_quote()
     entries = JournalEntry.query.filter_by(user_id=current_user.id).order_by(JournalEntry.date.desc()).all()
-    return render_template('dashboard.html', user=current_user, daily_plan=daily_plan, quote=quote, entries=entries)
+    badges = current_user.check_badges()
+    return render_template('dashboard.html', user=current_user, daily_plan=daily_plan, quote=quote, entries=entries, badges=badges)
 
 @app.route('/check-in', methods=['POST'])
 @login_required
