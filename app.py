@@ -153,14 +153,27 @@ def upload_audio():
     if 'audio' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
     
+    # Render/Gunicorn often strips the Authorization header or doesn't pass the API key correctly
+    # Ensure it's explicitly loaded
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        app.logger.error("OPENAI_API_KEY is missing!")
+        return jsonify({'error': 'System configuration error'}), 500
+    
+    # Re-initialize client if necessary
+    client = OpenAI(api_key=api_key)
+    
     file = request.files['audio']
     # Use a user-specific temp file to prevent race conditions
     temp_path = os.path.join(BASE_DIR, f'temp_audio_{current_user.id}.webm')
     file.save(temp_path)
     
     try:
+        app.logger.info("Starting audio transcription...")
         with open(temp_path, "rb") as audio_file:
             transcription = client.audio.transcriptions.create(model="whisper-1", file=audio_file)
+        
+        app.logger.info(f"Transcription: {transcription.text}")
         
         response = client.chat.completions.create(
             model="gpt-4o",
@@ -171,8 +184,8 @@ def upload_audio():
         )
         return jsonify({'message': response.choices[0].message.content})
     except Exception as e:
-        app.logger.error(f"Audio processing error: {e}")
-        return jsonify({'error': 'Failed to process audio'}), 500
+        app.logger.error(f"Audio processing error details: {str(e)}")
+        return jsonify({'error': f'Failed to process audio: {str(e)}'}), 500
     finally:
         if os.path.exists(temp_path):
             os.remove(temp_path)
