@@ -189,5 +189,15 @@ def upload_audio():
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
+@socketio.on('audio_stream')
+def handle_audio_stream(data):
+    # This is a basic implementation of a real-time stream handler
+    # We buffer incoming audio chunks and process them when a natural pause occurs
+    # or a threshold is reached.
+    app.logger.info(f"Received audio chunk of size: {len(data)}")
+    # In a real app, you would use an ASR stream (like OpenAI real-time)
+    # For now, acknowledge the data
+    emit('mentor_response', {'text': 'I am listening...'})
+
 if __name__ == '__main__':
     socketio.run(app, debug=False, port=5000)

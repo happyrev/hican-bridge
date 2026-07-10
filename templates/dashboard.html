@@ -113,9 +113,10 @@
         <!-- Mentor Tab -->
         <div id="tab-mentor" class="tab-content text-center pt-10">
             <div class="glass p-8 rounded-3xl inline-block w-full">
-                <h2 class="text-xl font-bold mb-6">AI Mentor</h2>
-                <button id="recordBtn" class="w-32 h-32 rounded-full bg-indigo-600 flex items-center justify-center text-5xl shadow-xl mx-auto transition">🎤</button>
-                <p id="status" class="mt-6 text-indigo-200 font-medium">Tap to start mentoring</p>
+                <h2 class="text-xl font-bold mb-6">AI Mentor (Live)</h2>
+                <button id="toggleRecord" class="w-32 h-32 rounded-full bg-indigo-600 flex items-center justify-center text-5xl shadow-xl mx-auto transition">🎤</button>
+                <p id="status" class="mt-6 text-indigo-200 font-medium">Click to start live chat</p>
+                <div id="transcript" class="mt-4 text-sm text-indigo-100 italic"></div>
             </div>
             <a href="/logout" class="block mt-6 text-red-400 font-bold">Logout</a>
         </div>
@@ -132,58 +133,44 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
 <script>
-    const recordBtn = document.getElementById('recordBtn');
+    const socket = io();
+    const toggleRecord = document.getElementById('toggleRecord');
+    const status = document.getElementById('status');
     let mediaRecorder;
-    let audioChunks = [];
+    let isRecording = false;
+
+    toggleRecord.onclick = async () => {
+        if (!isRecording) {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+            
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    socket.emit('audio_stream', event.data);
+                }
+            };
+            
+            mediaRecorder.start(250); // Send chunks every 250ms
+            isRecording = true;
+            status.innerText = 'Listening...';
+            toggleRecord.classList.add('pulse');
+        } else {
+            mediaRecorder.stop();
+            isRecording = false;
+            status.innerText = 'Processing...';
+            toggleRecord.classList.remove('pulse');
+        }
+    };
+
+    socket.on('mentor_response', (data) => {
+        status.innerText = 'Mentor: ' + data.text;
+        // Optional: play audio if you want real-time TTS back
+    });
 
     function switchTab(tab) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.getElementById('tab-' + tab).classList.add('active');
     }
-
-    async function requestCall() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            audioChunks = [];
-            mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-            mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                console.log('Blob size:', audioBlob.size); // Debugging
-                const formData = new FormData();
-                formData.append('audio', audioBlob, 'recording.webm');
-                    
-                document.getElementById('status').innerText = 'Uploading...';
-                try {
-                    const response = await fetch('/upload-audio', { 
-                        method: 'POST', 
-                        body: formData 
-                    });
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    const result = await response.json();
-                    document.getElementById('status').innerText = 'Mentor: ' + result.message;
-                } catch (e) {
-                    console.error('Upload failed:', e);
-                    document.getElementById('status').innerText = 'Upload failed.';
-                }
-            };
-            mediaRecorder.start();
-            document.getElementById('status').innerText = 'Recording...';
-            recordBtn.classList.add('pulse');
-        } catch (err) {
-            console.error(err);
-            document.getElementById('status').innerText = 'Mic access denied';
-        }
-    }
-
-    recordBtn.onclick = () => {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-            recordBtn.classList.remove('pulse');
-        } else {
-            requestCall();
-        }
-    };
 
     function submitQuiz(day) {
         const answer = document.getElementById('ans-'+day).value;
