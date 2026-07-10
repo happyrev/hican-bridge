@@ -87,16 +87,20 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        new_user = User(
-            username=request.form['username'],
-            name=request.form['name'],
-            age=request.form.get('age', 0),
-            bio=request.form.get('bio', '')
-        )
-        db.session.add(new_user)
-        db.session.commit()
-        login_user(new_user)
-        return redirect(url_for('dashboard'))
+        try:
+            new_user = User(
+                username=request.form['username'],
+                name=request.form['name'],
+                age=int(request.form.get('age', 0)),
+                bio=request.form.get('bio', '')
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user)
+            return redirect(url_for('dashboard'))
+        except Exception as e:
+            app.logger.error(f"Registration Error: {str(e)}")
+            return "Registration failed. Please check your inputs.", 500
     return render_template('register.html')
 
 def get_daily_quote():
