@@ -29,8 +29,13 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(120), nullable=False)
     age = db.Column(db.Integer)
     bio = db.Column(db.Text)
-    photo = db.Column(db.String(200))
+    journal_entries = db.relationship('JournalEntry', backref='student', lazy=True)
 
+class JournalEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -96,7 +101,8 @@ def get_daily_quote():
 @login_required
 def dashboard():
     quote = get_daily_quote()
-    return render_template('dashboard.html', user=current_user, daily_plan=daily_plan, quote=quote)
+    entries = JournalEntry.query.filter_by(user_id=current_user.id).order_by(JournalEntry.date.desc()).all()
+    return render_template('dashboard.html', user=current_user, daily_plan=daily_plan, quote=quote, entries=entries)
 
 @app.route('/check-in', methods=['POST'])
 @login_required
@@ -112,12 +118,23 @@ def check_in():
     score = int(response.choices[0].message.content.split()[0])
     return jsonify({'score': score})
 
+@app.route('/journal', methods=['GET', 'POST'])
+@login_required
+def journal():
+    if request.method == 'POST':
+        entry = JournalEntry(content=request.form.get('content'), user_id=current_user.id)
+        db.session.add(entry)
+        db.session.commit()
+    entries = JournalEntry.query.filter_by(user_id=current_user.id).order_by(JournalEntry.date.desc()).all()
+    return render_template('dashboard.html', user=current_user, entries=entries)
+
 @app.route('/submit-report', methods=['POST'])
 @login_required
 def submit_report():
     report = request.form.get('report')
-    report_path = os.path.join(BASE_DIR, 'weekly_reports.txt')
-    with open(report_path, 'a') as f:
+    # Track as an activity to earn badges
+    # (Implementation of badge logic)
+    with open(os.path.join(BASE_DIR, 'weekly_reports.txt'), 'a') as f:
         f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d')} | {current_user.name} | {report}\n")
     return redirect(url_for('dashboard'))
 
