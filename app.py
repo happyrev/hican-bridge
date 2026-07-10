@@ -151,23 +151,31 @@ def submit_report():
 def upload_audio():
     if not client: return jsonify({'message': 'System unavailable'}), 500
     if 'audio' not in request.files:
-        return jsonify({'error': 'No file'}), 400
+        return jsonify({'error': 'No file uploaded'}), 400
+    
     file = request.files['audio']
-    temp_path = os.path.join(BASE_DIR, 'temp_audio.webm')
+    # Use a user-specific temp file to prevent race conditions
+    temp_path = os.path.join(BASE_DIR, f'temp_audio_{current_user.id}.webm')
     file.save(temp_path)
     
-    with open(temp_path, "rb") as audio_file:
-        transcription = client.audio.transcriptions.create(model="whisper-1", file=audio_file)
-    
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are a supportive Hican Bridge mentor."},
-            {"role": "user", "content": transcription.text}
-        ]
-    )
-    os.remove(temp_path)
-    return jsonify({'message': response.choices[0].message.content})
+    try:
+        with open(temp_path, "rb") as audio_file:
+            transcription = client.audio.transcriptions.create(model="whisper-1", file=audio_file)
+        
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a supportive Hican Bridge mentor for high school students. Keep advice actionable and encouraging."},
+                {"role": "user", "content": transcription.text}
+            ]
+        )
+        return jsonify({'message': response.choices[0].message.content})
+    except Exception as e:
+        app.logger.error(f"Audio processing error: {e}")
+        return jsonify({'error': 'Failed to process audio'}), 500
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
 
 if __name__ == '__main__':
     socketio.run(app, debug=False, port=5000)
