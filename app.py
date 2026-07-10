@@ -154,44 +154,37 @@ def submit_report():
 @app.route('/upload-audio', methods=['POST'])
 @login_required
 def upload_audio():
-    if not client: return jsonify({'message': 'System unavailable'}), 500
+    # Hardcoded check to verify API key existence immediately
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        return jsonify({'error': 'Backend missing API Key'}), 500
+
     if 'audio' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
     
-    # Render/Gunicorn often strips the Authorization header or doesn't pass the API key correctly
-    # Ensure it's explicitly loaded
-    api_key = os.getenv('OPENAI_API_KEY')
-    if not api_key:
-        app.logger.error("OPENAI_API_KEY is missing!")
-        return jsonify({'error': 'System configuration error'}), 500
-    
-    # Re-initialize client if necessary
-    client = OpenAI(api_key=api_key)
-    
     file = request.files['audio']
-    # Use a safer temporary path for Render's ephemeral filesystem
-    # Render only allows writing to /tmp
-    temp_path = os.path.join('/tmp', f'temp_audio_{current_user.id}.webm')
+    temp_path = os.path.join('/tmp', f'temp_{current_user.id}.webm')
     file.save(temp_path)
     
     try:
-        app.logger.info("Starting audio transcription...")
+        # Use a new client instance per request for stability
+        temp_client = OpenAI(api_key=api_key)
+        
         with open(temp_path, "rb") as audio_file:
-            transcription = client.audio.transcriptions.create(model="whisper-1", file=audio_file)
+            transcription = temp_client.audio.transcriptions.create(model="whisper-1", file=audio_file)
         
-        app.logger.info(f"Transcription: {transcription.text}")
-        
-        response = client.chat.completions.create(
+        response = temp_client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a supportive Hican Bridge mentor for high school students. Keep advice actionable and encouraging."},
+                {"role": "system", "content": "You are a supportive Hican Bridge mentor."},
                 {"role": "user", "content": transcription.text}
             ]
         )
         return jsonify({'message': response.choices[0].message.content})
     except Exception as e:
-        app.logger.error(f"Audio processing error details: {str(e)}")
-        return jsonify({'error': f'Failed to process audio: {str(e)}'}), 500
+        # Log precisely what happened for debugging
+        app.logger.error(f"DEBUG_ERROR: {str(e)}")
+        return jsonify({'error': f'Processing Error: {str(e)}'}), 500
     finally:
         if os.path.exists(temp_path):
             os.remove(temp_path)
