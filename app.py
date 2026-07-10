@@ -102,8 +102,18 @@ def register():
 def dashboard():
     quote = ["Believe you can.", "Your potential is endless.", "Embrace vulnerability."][datetime.datetime.now().timetuple().tm_yday % 3]
     entries = JournalEntry.query.filter_by(user_id=current_user.id).order_by(JournalEntry.date.desc()).all()
-    return render_template('dashboard.html', user=current_user, daily_plan=daily_plan, quote=quote, entries=entries, badges=current_user.check_badges())
-
+    # Logic: Based on current streak/days active
+    day_index = min(len(entries) + 1, 30) # Assume 30 days
+    
+    current_day_data = daily_plan.get(str(day_index), {"pages": "N/A", "question": "No task today."})
+    
+    return render_template('dashboard.html', 
+                           user=current_user, 
+                           day=day_index, 
+                           info=current_day_data, 
+                           quote=quote, 
+                           entries=entries, 
+                           badges=current_user.check_badges())
 @app.route('/upload-audio', methods=['POST'])
 @login_required
 def upload_audio():
