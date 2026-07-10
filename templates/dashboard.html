@@ -139,33 +139,44 @@
     let mediaRecorder;
     let isRecording = false;
 
+    // Switch to simple POST-based audio upload, completely bypassing WebSockets.
+    // This is the most reliable way to handle audio on Render within your deadline.
     toggleRecord.onclick = async () => {
         if (!isRecording) {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+            audioChunks = [];
             
-            mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    socket.emit('audio_stream', event.data);
+            mediaRecorder.ondataavailable = (event) => audioChunks.push(event.data);
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+                
+                status.innerText = 'Sending to Mentor...';
+                try {
+                    const response = await fetch('/upload-audio', { method: 'POST', body: formData });
+                    const result = await response.json();
+                    if (result.message) {
+                        status.innerText = 'Mentor: ' + result.message;
+                    } else {
+                        status.innerText = 'Error: ' + result.error;
+                    }
+                } catch (e) {
+                    status.innerText = 'Upload failed.';
                 }
             };
             
-            mediaRecorder.start(250); // Send chunks every 250ms
+            mediaRecorder.start();
             isRecording = true;
-            status.innerText = 'Listening...';
+            status.innerText = 'Recording...';
             toggleRecord.classList.add('pulse');
         } else {
             mediaRecorder.stop();
             isRecording = false;
-            status.innerText = 'Processing...';
             toggleRecord.classList.remove('pulse');
         }
     };
-
-    socket.on('mentor_response', (data) => {
-        status.innerText = 'Mentor: ' + data.text;
-        // Optional: play audio if you want real-time TTS back
-    });
 
     function switchTab(tab) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
