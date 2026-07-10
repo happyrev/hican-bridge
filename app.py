@@ -1,6 +1,5 @@
 import eventlet
 eventlet.monkey_patch()
-
 import os
 import json
 import random
@@ -12,7 +11,7 @@ from flask_socketio import SocketIO, emit
 from openai import OpenAI
 
 app = Flask(__name__)
-app.secret_key = 'hican_secret_key'
+# ... rest of file ...
 
 api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key) if api_key else None
