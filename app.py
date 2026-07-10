@@ -1,17 +1,21 @@
 import eventlet
 eventlet.monkey_patch()
+
 import os
 import json
 import random
 import datetime
+
+# --- IMPORTANT: Everything imported below must be imported AFTER monkey_patch() ---
 from flask import Flask, render_template, request, redirect, session, jsonify, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_socketio import SocketIO, emit
 from openai import OpenAI
+# ---------------------------------------------------------------------------------
 
 app = Flask(__name__)
-# ... rest of file ...
+app.secret_key = 'hican_secret_key'
 
 api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key) if api_key else None
