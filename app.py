@@ -12,18 +12,19 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_socketio import SocketIO, emit
 from openai import OpenAI
-# ---------------------------------------------------------------------------------
-
 app = Flask(__name__)
 app.secret_key = 'hican_secret_key'
 
+# --- Restore API client and DB config ---
 api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key) if api_key else None
 
-socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hican.db'
 db = SQLAlchemy(app)
+# -----------------------------------------------------
+
+socketio = SocketIO(app, cors_allowed_origins="*") 
+# ---------------------------------------------------------------------------------
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 

@@ -1,2 +1,2 @@
-# The Gunicorn worker class is being ignored because it was missing from the Procfile's command arguments
+# Use gevent worker explicitly to support asynchronous operations
 web: gunicorn -k gevent -w 1 app:app
