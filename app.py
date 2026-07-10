@@ -23,7 +23,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hican.db'
 db = SQLAlchemy(app)
 # -----------------------------------------------------
 
-socketio = SocketIO(app, cors_allowed_origins="*") 
+socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*") 
 # ---------------------------------------------------------------------------------
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
