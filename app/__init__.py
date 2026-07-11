@@ -44,3 +44,6 @@ def create_app(test_config=None):
 
 # OpenAI Client (global, but could be injected)
 openai_client = OpenAI(api_key=settings.OPENAI_API_KEY) if settings.OPENAI_API_KEY else None
+
+# Instance for Gunicorn WSGI
+app = create_app()
