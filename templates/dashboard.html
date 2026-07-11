@@ -98,6 +98,14 @@
             </form>
         </div>
 
+        <div id="tab-profile" class="tab-content space-y-4">
+            <h2 class="text-xl font-bold mb-4">My Profile</h2>
+            <div class="glass p-5 rounded-3xl space-y-3">
+                <p class="text-indigo-300 font-bold">{{ user.name }}</p>
+                <p class="text-sm opacity-80">{{ user.bio }}</p>
+            </div>
+        </div>
+
         <div id="tab-mentor" class="tab-content text-center pt-10">
             <div class="glass p-8 rounded-3xl inline-block w-full">
                 <h2 class="text-xl font-bold mb-6">AI Mentor</h2>
@@ -110,9 +118,11 @@
 
     <nav class="fixed bottom-0 w-full glass p-5 flex justify-around border-t border-white/10 backdrop-blur-xl">
         <button onclick="switchTab('home')" class="text-2xl">🏠</button>
+        <button onclick="switchTab('profile')" class="text-2xl">👤</button>
         <button onclick="switchTab('reading')" class="text-2xl">📖</button>
         <button onclick="switchTab('journal')" class="text-2xl">✍️</button>
         <button onclick="switchTab('report')" class="text-2xl">📋</button>
+        <button onclick="switchTab('mentor')" class="text-2xl">💬</button>
     </nav>
 
     <script>
