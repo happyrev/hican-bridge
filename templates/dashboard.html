@@ -53,7 +53,7 @@
             </div>
         </div>
         <!-- Reading Tab -->
-        <div id="tab-reading" class="tab-content space-y-4 active">
+        <div id="tab-reading" class="tab-content space-y-4">
             <h2 class="text-xl font-bold mb-4">Day {{ day }} Journey</h2>
             <div class="glass p-5 rounded-3xl">
                 <p class="font-bold text-indigo-300">Today's Goal: {{ info.pages }}</p>
@@ -61,9 +61,10 @@
                     <p class="text-sm opacity-80 mb-4 italic">"Please finish reading today's pages before answering the daily questions."</p>
                 </div>
                 <div id="quiz-section" class="mt-4 space-y-2">
-                    <p class="text-sm font-bold">1. {{ info.question.split('|')[0] }}</p>
+                    {% set questions = info.question.split('|') %}
+                    <p class="text-sm font-bold">1. {{ questions[0] }}</p>
                     <textarea id="ans-1" class="w-full p-2 bg-slate-900/50 rounded-lg border border-white/10 text-sm" rows="2"></textarea>
-                    <p class="text-sm font-bold">2. {{ info.question.split('|')[1] }}</p>
+                    <p class="text-sm font-bold">2. {{ questions[1] if questions|length > 1 else 'What is one action you can take today based on this reading?' }}</p>
                     <textarea id="ans-2" class="w-full p-2 bg-slate-900/50 rounded-lg border border-white/10 text-sm" rows="2"></textarea>
                 </div>
                 <button onclick="submitQuiz('{{ day }}')" class="mt-3 w-full bg-indigo-600 py-3 rounded-2xl text-sm font-bold hover:bg-indigo-500 transition">Submit Answers</button>

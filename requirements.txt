@@ -31,6 +31,7 @@ openai==2.44.0
 packaging==26.2
 pydantic==2.13.4
 pydantic_core==2.46.4
+pydantic-settings==2.13.1
 PySocks==1.7.1
 python-engineio==4.13.3
 python-socketio==5.16.3

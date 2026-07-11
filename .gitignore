@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+.env
+.venv/
+venv/
+
+instance/*.db
+app/logs/
+temp_uploads/
+.hermes/
+hermes-verify-*.py

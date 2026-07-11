@@ -1,9 +1,9 @@
 {
-    "1": {"pages": "1-30", "question": "What is the primary definition of vulnerability according to the author?"},
-    "2": {"pages": "31-60", "question": "How does shame resilience differ from shame?"},
-    "3": {"pages": "61-90", "question": "What are the 'armors' we use to protect ourselves from vulnerability?"},
-    "4": {"pages": "91-120", "question": "How does vulnerability contribute to authentic leadership?"},
-    "5": {"pages": "121-150", "question": "Why is 'daring greatly' in parenting different from over-parenting?"},
-    "6": {"pages": "151-180", "question": "How do we cultivate a culture of vulnerability in our firms?"},
-    "7": {"pages": "181-220", "question": "Reflect: What is one brave step you will take after reading this book?"}
+    "1": {"pages": "1-30", "question": "What is the primary definition of vulnerability according to the author?|What is one moment today when you can practice healthy vulnerability?"},
+    "2": {"pages": "31-60", "question": "How does shame resilience differ from shame?|What is one shame-resilience practice you can use this week?"},
+    "3": {"pages": "61-90", "question": "What are the 'armors' we use to protect ourselves from vulnerability?|Which armor do you notice most in yourself, and what could you try instead?"},
+    "4": {"pages": "91-120", "question": "How does vulnerability contribute to authentic leadership?|How can a leader create safety for honest feedback?"},
+    "5": {"pages": "121-150", "question": "Why is 'daring greatly' in parenting different from over-parenting?|What lesson applies to mentoring or teamwork?"},
+    "6": {"pages": "151-180", "question": "How do we cultivate a culture of vulnerability in our firms?|What is one habit your team could adopt to build trust?"},
+    "7": {"pages": "181-220", "question": "What is one brave step you will take after reading this book?|How will you measure whether you followed through?"}
 }
